@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Love Rush 💖</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  overflow:hidden;
+  font-family:Poppins,sans-serif;
+  background:linear-gradient(135deg,#ff4e8a,#ff6ec7,#ff9a9e);
+  background-size:300% 300%;
+  animation:bgMove 8s ease infinite;
+  text-align:center;
+  color:#fff;
+}
+
+@keyframes bgMove{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+
+.gameTitle{
+  margin-top:20px;
+  font-size:30px;
+  font-weight:700;
+  letter-spacing:2px;
+  text-shadow:0 0 15px rgba(255,255,255,.8);
+}
+
+.scoreBoard{
+  position:fixed;
+  top:80px;
+  left:15px;
+  background:rgba(255,255,255,0.15);
+  padding:14px 20px;
+  border-radius:20px;
+  backdrop-filter:blur(12px);
+  box-shadow:0 0 20px rgba(0,0,0,.3);
+  font-size:14px;
+  text-align:left;
+  line-height:24px;
+}
+
+.scoreBoard span{
+  font-weight:bold;
+  font-size:16px;
+}
+
+/* 🔥 YOUR PIC STYLE */
+#heart{
+  position:absolute;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  object-fit:cover;
+  cursor:pointer;
+  display:none;
+  box-shadow:0 0 25px #ffffff;
+  transition:.1s;
+}
+
+#startBtn{
+  position:absolute;
+  top:260px;
+  left:50%;
+  transform:translateX(-50%);
+  padding:14px 35px;
+  font-size:18px;
+  border:none;
+  border-radius:18px;
+  background:#fff;
+  color:#ff4e8a;
+  font-weight:bold;
+  box-shadow:0 0 20px rgba(0,0,0,.3);
+}
+
+#starBtn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  font-size:30px;
+  background:none;
+  border:none;
+  cursor:pointer;
+  animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+  from{transform:scale(1);}
+  to{transform:scale(1.2);}
+}
+
+#result{
+  display:none;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:#fff;
+  color:#ff4e8a;
+  padding:25px;
+  border-radius:20px;
+  width:85%;
+  box-shadow:0 0 30px rgba(0,0,0,.5);
+}
+
+/* Sparkle for hit */
+.sparkle{
+  position:absolute;
+  font-size:18px;
+  animation:spark 0.5s ease forwards;
+}
+
+@keyframes spark{
+  0%{opacity:1;transform:scale(1);}
+  100%{opacity:0;transform:scale(2);}
+}
+
+/* Hit shake */
+.hit{
+  animation:hitAnim 0.2s;
+}
+
+@keyframes hitAnim{
+  0%{transform:translate(0,0) rotate(0);}
+  25%{transform:translate(-5px,-5px) rotate(-15deg);}
+  50%{transform:translate(5px,5px) rotate(15deg);}
+  75%{transform:translate(-5px,5px) rotate(-10deg);}
+  100%{transform:translate(0,0) rotate(0);}
+}
+</style>
+</head>
+
+<body>
+
+<div class="gameTitle">💖 LOVE RUSH 💖</div>
+
+<div class="scoreBoard">
+  ❤️ Score: <span id="score">0</span><br>
+  🏆 High Score: <span id="highScore">0</span><br>
+  ⏳ Time: <span id="timer">20</span>
+</div>
+
+<button id="startBtn">START GAME</button>
+
+<!-- 🔥 YOUR PIC -->
+<img id="heart" src="mypic.jpg">
+
+<button id="starBtn" onclick="showStar()">⭐</button>
+
+<div id="result">
+  <h2>💞 You Captured My Heart 💞</h2>
+  <p id="messageText"></p>
+  <button onclick="restart()">Play Again 💖</button>
+</div>
+
+<!-- Sounds -->
+<audio id="tapSound" src="https://assets.mixkit.co/active_storage/sfx/2001/2001-preview.mp3"></audio>
+
+<script>
+let score=0;
+let time=20;
+let interval;
+
+let heart=document.getElementById("heart");
+let scoreEl=document.getElementById("score");
+let timerEl=document.getElementById("timer");
+let result=document.getElementById("result");
+let startBtn=document.getElementById("startBtn");
+let tapSound=document.getElementById("tapSound");
+
+let highScore=localStorage.highScore||0;
+document.getElementById("highScore").innerText=highScore;
+
+function moveHeart(){
+  let x=Math.random()*(window.innerWidth-70);
+  let y=Math.random()*(window.innerHeight-200);
+  heart.style.left=x+"px";
+  heart.style.top=y+"px";
+}
+
+function sparkleEffect(x,y){
+  let s=document.createElement("div");
+  s.className="sparkle";
+  s.innerText="💥";
+  s.style.left=x+"px";
+  s.style.top=y+"px";
+  document.body.appendChild(s);
+  setTimeout(()=>s.remove(),500);
+}
+
+heart.addEventListener("click", function(e){
+  tapSound.currentTime=0;
+  tapSound.play();
+
+  // Hit effect
+  heart.classList.add("hit");
+  setTimeout(()=>heart.classList.remove("hit"),200);
+
+  sparkleEffect(e.clientX,e.clientY);
+
+  score++;
+  scoreEl.innerText=score;
+  moveHeart();
+});
+
+function startGame(){
+  startBtn.style.display="none";
+  heart.style.display="block";
+  moveHeart();
+
+  interval=setInterval(()=>{
+    time--;
+    timerEl.innerText=time;
+
+    if(time<=0){
+      clearInterval(interval);
+      heart.style.display="none";
+      result.style.display="block";
+
+      document.getElementById("messageText").innerHTML=
+      "Hey Esita ❤️<br><br>You caught my handsome king 😎💖<br>I Love You Forever 💕";
+
+      if(score>highScore){
+        highScore=score;
+        localStorage.highScore=highScore;
+        document.getElementById("highScore").innerText=highScore;
+      }
+    }
+  },1000);
+}
+
+function restart(){
+  score=0;
+  time=20;
+  scoreEl.innerText=0;
+  timerEl.innerText=20;
+  result.style.display="none";
+  heart.style.display="block";
+  moveHeart();
+  startGame();
+}
+
+function showStar(){
+  alert("⭐ Esita, He is Yours Forever ❤️");
+}
+
+startBtn.addEventListener("click",startGame);
+</script>
+
+</body>
+</html>
